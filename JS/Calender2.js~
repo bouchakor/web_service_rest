@@ -1,0 +1,318 @@
+URN_c = 'http://www.google.com/calendar/feeds/french@holiday.calendar.google.com/public/full?alt=json';
+
+$(function(){
+	//empecher de perdre le service lors du drag de la page html
+	$('#google').draggable({ containment: 'parent' });
+	 //maximisée le service
+        $('#googleFull').click(function () {
+	    //montrer les resultats 
+	    $('#google_contents').show();
+	    $('#googleResult').show();
+	    //cacher tous les autres services
+	    $('#design_search').animate({
+		
+	    	width: "25%",
+		height: "5%",
+		top:1043,
+		left:897,
+	      
+	      
+	    });
+	    $('#Rss').animate({
+		
+	    	width: "25%",
+		height: "5%",
+		top:1043,
+		left:602,
+	      
+	      
+	    });
+	    $('#Maps').animate({
+		
+	    	width: "25%",
+		height: "5%",
+		top:1043,
+		left:301,
+	      
+	      
+	    });
+	    $('#Youtube').animate({
+		
+	    	width: "25%",
+		height: "5%",
+		top:1043,
+		left:0,
+	      
+	      
+	    });
+	     //desactiver le drage en mode aggrandir
+	    $('#google').draggable("disable");
+	    //mettre les serives dans la bare
+	    $('#Maps-menubarOuter').hide();
+	    $('#Youtube-contents').hide();
+	    $('#itineraire').hide();
+	    $('#selectionRss').hide();
+	    $('#selectVille').hide();
+	    $('#design_search_contents').hide();
+	    $('#Rssresults').hide();
+	    $('#resultat').hide(); 
+	    
+	    //maintenant maximisée le service
+	    $('#google').animate({ 
+	        top:0,
+		left:0,
+		width: "100%",
+		height: "94.5%",	
+	      }, 15);
+	    
+	     //démaximisée le service
+	    $('#googleBar').click(function () {
+		  $('#design_search').show();
+		  $('#Rss').show();
+		  $('#Maps').show();
+		  $('#google').draggable("enable");
+		  $('#google').animate({ 
+		      width: "40%",
+		      height:"40%",
+		    }, 10 );
+	    });
+      
+	});
+	
+	// fermer le service
+	$('#googleClose').click(function () {
+	    $('#google').hide();
+	});
+	
+    	//appele des fonctions
+	requestGoogleJson();
+
+	
+});
+
+
+function requestGoogleJson(){
+ //type:'GET',
+//'rest':encodeURIComponent(URN_c),
+      $.ajax({
+	url:"/WebService/response",
+	data:{
+	      'rest':URN_c,
+	},
+	dataType:'json',
+	success: function(requester) {
+	   toDoOnSuccessGoogle(requester);
+
+	}
+	
+      })
+}
+
+function toDoOnSuccessGoogle(requester) {
+
+    var feed = requester.feed;
+    var entries = feed.entry || [];
+      //console.log("entries",entries);
+
+    var jourFeries=new Array();
+    for (var i = 0; i < entries.length; ++i) {
+	var entry = entries[i];
+   	jourFeries.push({
+	    date:entry.gd$when[0].startTime,
+	    title:entry.title.$t
+	});
+    
+    }
+    $("#google_contents").datepicker({
+	beforeShowDay:function(date){
+	    return setJourFeries(date,jourFeries);
+	}
+    });
+}
+function setJourFeries(date,jourFeries){
+    var annee=date.getFullYear();
+    var mois;
+
+    if((date.getMonth()+1)<10)
+	mois='0'+(date.getMonth()+1);
+    else
+	mois=(date.getMonth()+1);
+
+    var jour;
+    if(date.getDate()<10)
+	jour='0'+date.getDate();
+    else
+	jour=date.getDate();
+
+    var dateComp=annee+"-"+mois+"-"+jour;
+    var result='</br>';
+    for(var i=0;i<jourFeries.length;i++)
+	if(dateComp==jourFeries[i].date){
+		
+	    return [true,'jourFerie',jourFeries[i].title];
+	}
+    return [true,'',''];
+}
+
+ /*
+$('#googleResult').datepicker({
+     onSelect: function(dateText, inst) {
+       var day = $("#googleResult").datepicker('getDate').getDate();
+       var month = $("#googleResult").datepicker('getDate').getMonth()+1;             
+       var year = $("#googleResult").datepicker('getDate').getFullYear();
+	$('#googleInfo').html('');
+	var formatdate=year+"-"+month+"-"+day;
+	console.log(formatdate);
+
+   var feed = requester.feed;
+   var entries = feed.entry || [];
+      //console.log("entries",entries);
+   var html = ['<ul>'];
+
+    for (var i = 0; i < entries.length; ++i) {
+      var entry = entries[i];
+   
+      var title = entry.title.$t;
+      var result= '<br>'+title+'Resultats<br/><dl>';
+      var start = (entry['gd$when']) ? entry['gd$when'][0].startTime : "";	
+     // var resul+="<dd>"+start+title"</dd>";
+      result+='<br>'+start+' '+title+'</br>'; 
+     
+      $('#googleInfo').html(result);
+      //document.getElementById("googleInfo").innerHTML = html.join("");
+     // $('#googleInfo').html(resul);
+      if (formatdate==start){
+	console.log("ok",start,formatdate);
+	
+	
+	$('#googleInfo').html(start+title);
+      }
+      else
+	console.log("pas d'evenement");
+     
+    }
+
+   
+    
+    }
+});*/
+	     /* var html = '<p>Total of ' + json.feed.entry.length + ' event(s)</p>';
+
+	      html += '<ul>';
+
+	      $.each(json.feed.entry,function(i,entry) {
+
+	      html += '<li><strong>Event title:</strong> ' + entry.title.$t + '</li>';
+	      
+	      })
+
+	      html += '</ul>';
+
+	      $('#googleResult').html(html);
+
+		/*if(trait.feed.openSearch$totalResults.$t == 0)
+		{
+			var info = "Pas de résultats :-(";
+		}
+		else
+		{
+			var info = trait.feed.title.$t+' : '+trait.feed.subtitle.$t+' : '+trait.feed.openSearch$totalResults.$t+' affichés';
+		}
+		
+		$('#googleInfo').append(info);	
+		var googleR = new Element('div', {'id':'googleResult'});	 
+		trait.feed.entry.each(function(r){
+			var res = new Element('div', {'class':'googleResultResultat'});
+			
+			var link = new Element('a', {'class':'googleResultTitle',href:r.id.$t}).update(r.title.$t);
+			var date = new Element('p').update(r.gd$when[0].startTime+" jusqu'au "+r.gd$when[0].endTime);
+			Element.insert(res, link );
+			Element.insert(res, date );
+			googleR.insert(res);
+		});
+		$('googleResult').replace(googleR);*/
+
+
+
+
+
+/*function connecte(){
+	var q=$("#google_calendar_name").val();
+	
+	req="/Proxy/response";
+	$.get(req, "q="+q,
+		  function(q) {
+			analyse(q);
+		  },
+		  "json");
+}
+
+function analyse(q){
+  
+ data=q;
+ //var i= data.responseData.cursor.resultCount;
+ var results = data.responseData.results;
+ 
+  
+ $('#resultat').html(data.responseData.results[1].title);
+ 
+         $.each(data.responseData.results, function(key,value) {
+	     $('#resultat').html(data.responseData.results[key].title);
+	for(var i=0;i< data.responseData.results.length;i++){
+	 // alert(data.responseData.results[i].url);
+	$('#resultat').append(data.responseData.results[i].url);
+	}
+        //});
+ 
+
+ 
+}*/
+
+/*function analyse(q){
+  
+ /*data=q;
+ var nbResulta= data.responseData.cursor.resultCount;
+ var ResultData = data.responseData.results;
+ //var ResultData=eval(data);
+ 
+  if(nbResulta){
+	var ResultRecherch= '<br/><br/>'+nbResulta+'Resultats<br/><dl>';
+	
+	
+	
+			else
+		{
+			var info = data.feed.title.$t+' : '+data.feed.subtitle.$t+' : '+data.feed.openSearch$totalResults.$t+' affichés';
+		}
+		$('googleInfo').replace(new Element('div', {'id':'googleInfo'}).insert(info));	
+		var googleR = new Element('div', {'id':'googleResult'});	 
+		data.feed.entry.each(function(r){
+			var res = new Element('div', {'class':'googleResultResultat'});
+			
+			var link = new Element('a', {'class':'googleResultTitle',href:r.id.$t}).update(r.title.$t);
+			var date = new Element('p').update(r.gd$when[0].startTime+" jusqu'au "+r.gd$when[0].endTime);
+			Element.insert(res, link );
+			Element.insert(res, date );
+			googleR.insert(res);
+		});
+		$('googleResult').replace(googleR);
+	
+	
+	
+	
+	
+	ResultData.forEach(function(element,index,array){
+	
+	ResultRecherch+="<dt><a href='"+element.url+"'><b>"+element.title+"'</b></a></dt>";
+	ResultRecherch+="<dd>"+element.content+"</dd>";
+	ResultRecherch+="<dd><u>"+element.url+"</u></dd>";
+	});
+	
+	ResultRecherch+="</dl>";
+	
+	$('#resultat').html(ResultRecherch);
+	}
+
+*/
+
+	//}*/

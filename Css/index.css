@@ -1,0 +1,208 @@
+
+#window{
+	width: 1209px;
+	height: 1125px;
+	border: 5px solid navy;
+	text-align: center;
+	margin: 0 auto;
+	padding: 0;
+	position: relative;
+	top:0px;
+	background: darkcyan;
+}
+
+#page {
+	width: 1200px;
+	height: 1100px;
+	margin: 5px;
+	position: relative;
+	background: black url("../resources/Fond-ecran.jpg") no-repeat ;
+}
+.box{
+	width: 400px;
+	height: 400px;
+	font-size:0.8em ;
+	border: 1px solid navy;
+	background: #ddf;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+}
+.boxRss{
+	width: 300px;
+	height: 1100px;
+	font-size:0.8em ;
+	border: 1px solid navy;
+	background: #ddf;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+}
+
+.boxMap{
+	width: 400px;
+	height: 400px;
+	font-size:0.8em ;
+	border: 1px solid navy;
+	background: #ddf;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+}
+
+.boxSearch{
+	width: 400px;
+	height: 400px;
+	font-size:0.8em ;
+	overflow: auto;
+	border: 1px solid navy;
+	background: #ddf;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+}
+.boxYoutube{
+	width: 400px;
+	height: 400px;
+	font-size:0.8em ;
+	overflow: auto;
+	border: 1px solid navy;
+	background: #ddf;
+	text-align: center;
+	margin: 0;
+	padding: 0;
+	position: absolute;
+}
+
+
+div.ui-datepicker-inline {
+
+background: yellow;
+ margin:auto;
+
+}
+
+.holiday{
+      -moz-box-shadow: inset -5px -5px 5px 5px #F22630;
+      -webkit-box-shadow: inset -5px -5px 5px 5px#F22630;
+      box-shadow: inset -5px -5px 5px 5px #F22630;
+}
+
+
+.contents{
+	overflow: auto;
+
+}
+.menubar{
+	background: navy;
+	cursor: move;
+	color: white;
+	height: 20px;
+}
+.menubarOuter{
+	display:none;
+	width:  500px;
+	left: 120px; 
+	top: 120px;
+	position: absolute;
+	overflow:visible; 
+	background: navy;
+	cursor: move;
+	color: white;
+	height: 20px;
+	border: 1px solid black;
+	margin:auto;
+	
+	
+}
+
+.barBt{
+	float: right;
+	font-size:0.7em ;
+	display: block;
+	margin: 0 2px;
+	border: 2px solid darkcyan;
+	cursor: default;
+	width: 20px;
+}
+
+
+#Maps {
+	left:0px;
+	top:0px;
+	opacity:1;
+}
+#google{
+	left:480px;
+	top:0px;
+	overflow:auto;
+	opacity:1;
+}
+#design_search{
+	left:0px;
+	top:500px;
+	opacity:1;
+	
+}
+
+#Rss{ 	
+
+	overflow: auto;
+	left:900px;
+	top:0px;
+	opacity:1;
+	
+	
+}
+
+#Rssresults{
+  	overflow: auto;
+	left:900px;
+	top:10px;
+	text-align : center;
+}
+#resultat{
+	overflow: auto;
+	text-transform : capitalize; 
+	color:#1e5799;
+}
+#Youtube{ 	
+	
+	overflow: auto;
+	right:300px;
+	top:500px;
+	opacity:1;
+	
+	
+}
+
+.search_input
+{
+
+border:2px solid #333;
+font-size:20px;
+padding:5px;
+width:350px;
+font-family:'Georgia', Times New Roman, Times, serif;
+-moz-border-radius:5px;-webkit-border-radius:5px;
+
+
+}
+
+#resultatYoutube
+{
+background-color:#111;
+margin-top:10px;
+min-height:200px;
+width:350px;
+height:350px;
+border:solid 10px #ffffff;
+margin:10px;
+-moz-border-radius:9px;
+-webkit-border-radius:9px;
+
+}

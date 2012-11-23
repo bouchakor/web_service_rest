@@ -1,0 +1,200 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="fr-FR" xml:lang="fr-FR">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+    <title>Zakaria Bouchakor</title>
+    
+    <link rel="stylesheet" type="text/css" href="Css/index.css" />
+    <link rel="stylesheet" type="text/css" href="Css/Maps.css" />
+    <link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet" type="text/css"/>
+      
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.5/jquery.min.js"></script>
+    <script src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/jquery-ui.min.js"></script>
+    <script type='text/javascript' src='datepicker/datepicker.js'></script>
+    <script type="text/javascript" src="JS/Recherche.js"></script>
+    <script type="text/javascript" src="JS/Maps.js"></script>
+    <script type="text/javascript" src="ajaxslt/util.js"></script>
+    <script type="text/javascript" src="ajaxslt/xmltoken.js"></script>
+    <script type="text/javascript" src="ajaxslt/dom.js"></script>
+    <script type="text/javascript" src="ajaxslt/xpath.js"></script>
+    <script type="text/javascript" src="ajaxslt/xslt.js"></script>
+    <script type="text/javascript" src="JS/Rss.js"></script>
+    <script type="text/javascript" src="JS/Youtube.js"></script>
+    <script type="text/javascript" src="JS/Calender.js"></script>
+    
+</head>
+<body>
+
+	<div id="window">
+		<div id="page-menubar" class="menubar">
+			Zakaria Bouchakor Master 2 SIRES 
+		</div>
+
+		<div id="page">
+		      <!-- Calendrier-->
+			<div id='google'  class="box">
+				<div id="google-menubar" class="menubar">
+					<p id="googleClose" class="barBt">X</p>
+					<p id="googleFull" class="barBt">O</p>
+					<p id="googleBar" class="barBt">o</p>
+					Google Calendar 
+				</div>
+
+				<div id="google_contents" >
+					
+					
+				</div>
+			</div>
+			<!-- La Map-->
+			<div id='Maps'  class="boxMap">
+
+			      <body onload="init()">
+				      <div id="Maps-menubar" class="menubar">
+					      <p id="MapsClose" class="barBt">X</p>
+					      <p id="MapsFull" class="barBt">O</p>
+					      <p id="MapsBar" class="barBt">o</p>
+					      Maps Bouchakor Ducatel
+				      </div>
+				      
+				      <div id='selectVille' >
+					      <label for='depart' >Ville de depart</label>
+					      <select name='depart' id='depart'>
+						      <option value='-----' selected='selected' >-----</option>
+						      <option value='amily'>amily</option>
+						      <option value='arthenay'>arthenay</option>
+						      <option value='bellgrade'>bellgrade</option>
+						      <option value='chateauneuf_sur_loire'>chateauneuf-sur-loire</option>	
+						      <option value='gien'>gien</option>	
+						      <option value='la_fierte_saint_aubin'>la fierte saint-aubin</option>
+						      <option value='montargis'>montargis</option>
+						      <option value='olivet'>olivet</option>
+						      <option value='ouzouer_sur_loire'>ouzouer-sur-loire</option>
+						      <option value='orleans'>orleans</option>
+						      <option value='pithiviers'>pithiviers</option>
+					      </select>
+					      <label for='destination' ><br/>Ville d'arriv&eacute;</label>
+					      <select name='destination' id='destination'>
+						      <option value='-----' selected='selected' >-----</option>
+						      <option value='amily'>amily</option>
+						      <option value='arthenay'>arthenay</option>
+						      <option value='bellgrade'>bellgrade</option>
+						      <option value='chateauneuf_sur_loire'>chateauneuf-sur-loire</option>	
+						      <option value='gien'>gien</option>	
+						      <option value='la_fierte_saint_aubin'>la fierte saint-aubin</option>
+						      <option value='montargis'>montargis</option>
+						      <option value='olivet'>olivet</option>
+						      <option value='ouzouer_sur_loire'>ouzouer-sur-loire</option>
+						      <option value='orleans'>orleans</option>
+						      <option value='pithiviers'>pithiviers</option>
+					      </select><br/>
+					      
+					      <input type='button' id='calcul' value="Calculer l'itin&eacute;neraire" /><br/>
+					      <input type='button' id='ouvrir' value="Ouvrir la Map" />
+					      
+				      </div>
+				      <div id='itineraire'  class='boxMsg'>
+					      <h2>Itineraire</h2>
+					      <span id='listeItineraire'>
+					      </span>
+				      </div>
+
+			      </body>
+
+			</div>
+
+			  <!-- Rss-->
+			<div id="Rss"  class="boxRss">
+				<div id="Rss-menubar" class="menubar">
+					<p id="RssClose" class="barBt">X</p>
+					<p id="RssFull" class="barBt">O</p>
+					<p id="RssBar" class="barBt">o</p>
+				Rss
+				</div>
+				  	      <!--<label for='depart' >Ville de depart</label>-->
+					      <select id='SelectRss'>
+						    
+						      <option value='http://rss.lemonde.fr/c/205/f/3061/index.rss'>Le Monde Technologies</option>
+						      <option value='http://news.google.com/news?ned=us&topic=t&output=rss'>Sci/Tech - Google News</option>
+						      <option value='http://news.google.com/news?ned=us&topic=h&output=rss'>À la une</option>
+						      <option value='http://www.journaldunet.com/developpeur/rss/breve/client-web/'>JournalNet</option>
+						      <option value=' http://news.google.com/news?ned=us&topic=s&output=rss'>Google Sport</option>
+						      <option value='  http://news.google.com/news?ned=us&topic=e&output=rss'>Google Culture</option>
+					      <select/>
+					      <input type='button' id='GoRss' value="Go" /><br/>
+				<div id="Rssresults"></div>
+			</div>
+			
+
+				      
+			      
+			<!-- Google Recherche-->
+			<div id='design_search'  class="boxSearch">
+				<div id="design_search-menubar" class="menubar">
+					<p id="design_searchMapClose" class="barBt">X</p>
+					<p id="design_searchMapFull" class="barBt">O</p>
+					<p id="design_searchMapBar" class="barBt">o</p>
+					Moteur de recherche
+					<div id="design_search_contents" class="contents">
+						<div class="menubar">
+							<form id="form">
+							<input type="button" id="b_search" value="Chercher"/>
+							<input type="text" name="mon-champ" id="mon-champ"/><br/>
+							</form>
+						</div>
+						<div id="resultat"></div> 
+				      
+					</div>
+				</div>
+			  
+
+			 </div>
+
+			<div id='Youtube'  class="boxYoutube">
+				<div id="Youtube-menubar" class="menubar">
+					<p id="Youtube-Close" class="barBt">X</p>
+					<p id="Youtube-Bar" class="barBt">o</p>
+					Recherche Video sur Youtube
+					<div id="Youtube-contents" class="contents">
+						<div class="menubar">
+							<form id="form">
+							<input type="button" id="Goo" value="Go"/>
+							<input type="text" id="search_input"/><br/>
+							</form>
+						</div>
+					
+
+						<div id="resultatYoutube"></div> 
+				      
+					</div>
+				</div>
+			  
+
+			 </div>
+
+			<!-- Naviguation dans la carte Maps-->
+			<div id="Maps-menubarOuter" class="menubarOuter">
+					<p id="fermer" class="barBt">X</p>
+						
+				<div id="outerDiv" class="ui-widget-header">
+
+					<div id="zoomTools">
+						<img src='./resources/zoom+.png' class='zoom' alt='zoom Plus'  id='zoomPlus'/><br/>
+						<img src='./resources/zoom-.png' class='zoom' alt='zoom Moins'  id='zoomMoins'/>
+					</div>
+						<img src='./resources/n.png'  id="n"/>
+						<img src='./resources/s.png'  id="s"/>
+						<img src='./resources/w.png'  id="w"/>
+						<img src='./resources/e.png'  id="e"/>
+					<div id="innerDiv">
+						<div id='divPunaise'></div>
+					
+					
+					</div>
+				</div>
+			</div>
+
+		</div>
+
+	</div>
+</body>
+</html>

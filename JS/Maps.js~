@@ -1,0 +1,484 @@
+/**
+ * Variables partagees entre les differentes fonctions.
+ */
+var dragging = false;
+var top;
+var left;
+var dragStartTop;
+var dragStartLeft;
+
+var tileSize       = 100;
+var viewportWidth  = 600;
+var viewportHeight = 600;
+
+var centreX;
+var centreY;
+
+// Variable qui contient le niveau de zoom
+var zoom;
+
+// Variable qui contient les tailles d'images
+var tailleImage=[
+    [900,800],
+    [1200,1000],
+    [1400,1200],
+    [1700,1400],
+    [1900,1600],
+];
+
+/**
+ * Variable qui contient les positions des villes au zoom 0
+ */
+var positionVille={
+    amily : [710,320],
+    arthenay : [233,240],
+    bellgrade :[537,300],
+    chateauneuf_sur_loire:[420,410],
+    gien:[650,550],
+    la_fierte_saint_aubin:[260,530],
+    montargis:[685,295],
+    olivet:[243,420],
+    ouzouer_sur_loire:[555,490],
+    orleans:[240,385],
+    pithiviers :[435,163],                                                                                          
+};
+
+
+// Fonction charger lorsque le DOM est pret
+$(function(){
+    init();
+});
+
+
+/**
+ * Initialisation.
+ * On repere le DIV externe et on lui ajoute des callbacks pour les
+ * evenements :
+ * 		- clic de souris : debuter le mouvement et changer le curseur.
+ * 		- mouvement souris : bouger le DIV interne si mouvement debute.
+ * 		- relachement du bouton souris : remettre le curseur.
+ *      - clic de souris sur le bouton zoomPlus: Faire un Zoom +
+ *      - clic de souris sur le bouton zoomMoins: Faire un Zoom -
+ *      - changement dans la liste des villes de depart: affichage d'une punaise sur la ville de depart
+ *      - changement dans la liste des villes de destination: affichage d'une punaise sur la ville de destination
+ *      - clic sur le bouton: calcul d'un itinéraire, affichage des punaises sur les points de passages, affichage de l'itineraire,
+ *                            affichage de la distance totale entre les deux villes
+ */
+function init() {
+    zoom=0;
+    setInnerDivSize(tailleImage[zoom][0], tailleImage[zoom][1]);
+    
+    $('#outerDiv').mousedown(startMove);
+    $('#outerDiv').mousemove(processMove);
+    $('#outerDiv').mouseup(stopMove);
+
+    // action sur la liste des villes de depart
+    $('#depart').change(function(){
+		  affichePunaise('depart',$('#depart').val());
+		  return false;
+    });
+    
+    // action sur la listes des villes de destination
+    $('#destination').change(function(){
+		  affichePunaise('destination',$('#destination').val());
+		  return false;
+    })
+    
+    // action sur le bouton de calcul d'itineraire
+    $('#calcul').click(getItineraire);
+
+    // action sur le bouton de zoom+
+    $('#zoomPlus').mousedown(zoomPlus);
+
+    // action sur le bouton de zoom -
+    $('#zoomMoins').mousedown(zoomMoins);
+    checkTiles();
+
+    // Initialisation du scroll (zoom)
+    $('#outerDiv').mousewheel(function(event, delta) {
+		  handle(delta);
+		  return false;
+    });
+
+    // initialisation des liste de ville
+    $('#depart').val($(this)[0]);
+    $('#destination').val($(this)[0]);
+
+}
+
+
+/**
+ * Fonction qui va afficher la punaise sur la ville choisie
+ * type = depart ou destination
+ * ville= nom de la ville
+ **/
+function affichePunaise(type,ville){
+    
+    /************************* INITIALISATION ************************/
+    
+    // on doit commencé par supprimer toutes les punaises des points de passages precedents si elles existent
+    var tab=new Array();
+    for( i=0; i<$('#divPunaise img').length; i++ ) {
+		  var regex_punaise=/punaise_[0-9]+/;
+		  if(regex_punaise.test($('#divPunaise img')[i].id))
+				tab.push($('#divPunaise img')[i].id);
+    }
+    
+    for(var i=0;i<tab.length;i++)
+		  $('#divPunaise #'+tab[i]).remove();
+    
+    // on doit supprimer le contenu de l'itineraire
+    $('#listeItineraire').html('');
+    
+    // puis cacher la div itineraire
+    $('#itineraire').hide();
+    
+    // on supprime l'ancienne punaise de depart ou de destination
+    if($('#punaise_'+type).length!=0)
+		  $('#divPunaise #punaise_'+type).remove();
+
+    
+    /*********************** PLACEMENT DE LA PUNAISE **********************/
+    
+    //calcul du ratio pour le deplacement des punaises en fonction du zoom
+    var ratioX=tailleImage[zoom][0]/tailleImage[0][0];
+    var ratioY=tailleImage[zoom][1]/tailleImage[0][1];
+    
+    //  si la ville n'est pas -----
+    if(ville!='-----'){
+
+		  // creation de la punaise
+		  punaise=$('<img />').attr({
+				id:'punaise_'+type,
+				src:'http://localhost:8080/WebService/resources/punaise_'+type+'.png',
+				alt:'punaise ville '+type,
+				title:Premiere(ville),
+				ville:ville,
+				class:'punaise',
+				style:'position: absolute;left:'+Math.floor(positionVille[ville][0]*ratioY)+'px;top:'+Math.floor(positionVille[ville][1]*ratioX)+'px;'
+		  });
+		  
+		  // on ajoute la punaise au div
+		  $('#divPunaise').append(punaise);
+    }
+
+}
+
+/**
+ * methode qui permet de mettre en majuscule la premiere lettre d'une string
+ * @param chaine a travailler
+ * @returns chaine avec la premiere lettre en majuscule
+ */
+function Premiere(chaine){
+    return chaine.substr(0,1).toUpperCase()+chaine.substr(1,chaine.length).toLowerCase();	
+}
+
+/**
+ * Modification du niveau de zoom en fonction du sens de scroll
+ */
+function handle(delta) {
+    if (delta < 0)
+		  zoomMoins();
+    else
+		  zoomPlus();
+}
+
+/**
+ * Fonction qui permet de zoomer 
+ */
+function zoomPlus(  ){
+    
+    if(zoom<4){
+		  zoom++;
+		  setInnerDivSize(tailleImage[zoom][0], tailleImage[zoom][1]);
+		  var t= stripPx($('#innerDiv').css('top') );
+		  var l= stripPx($('#innerDiv').css('left'));
+		  checkInnerDiv(t, l);
+		  corrigeZoom("plus");
+		  checkTiles();
+    }
+}
+
+/**
+ * Fonction qui permet de dezoomer
+ */
+function zoomMoins(  ){
+    
+    if(zoom>0){
+		  zoom--;
+		  setInnerDivSize(tailleImage[zoom][0], tailleImage[zoom][1]);
+		  var t= stripPx($('#innerDiv').css('top'));
+		  var l= stripPx($('#innerDiv').css('left'));
+		  checkInnerDiv(t, l);
+		  corrigeZoom("moins");
+		  checkTiles();
+    }
+}
+
+
+/**
+ * Fonction qui permet de recadrer le zoom
+ * et de replacer les punnaises
+ */
+function corrigeZoom(type){
+    // Ici on va recentré l'innerDiv aprés un zoom
+    var mapX = stripPx($('#innerDiv').css('left'))-viewportWidth/2;
+    var mapY = stripPx($('#innerDiv').css('top'))-viewportHeight/2;
+
+    var diffX,diffY;
+    if(type=="plus"){
+		  diffX=tailleImage[zoom][0]/tailleImage[zoom-1][0];
+		  diffY=tailleImage[zoom][1]/tailleImage[zoom-1][1];
+    }
+    else{
+		  diffX=tailleImage[zoom][0]/tailleImage[zoom+1][0];
+		  diffY=tailleImage[zoom][1]/tailleImage[zoom+1][1];
+    }
+
+    var decX=Math.floor((mapX*diffX)+viewportWidth/2);
+    var decY=Math.floor((mapY*diffY)+viewportHeight/2);
+    
+    
+    if(decX>0)
+		  decX=0;
+    if(decY>0)
+		  decY=0;
+
+
+    $('#innerDiv').css('left',decX+"px");
+    $('#innerDiv').css('top',decY+"px");
+    
+    
+    //maintenant on va replacer les punaises (si elle existe) aprés le zoom
+    var ratioX=tailleImage[zoom][0]/tailleImage[0][0];
+    var ratioY=tailleImage[zoom][1]/tailleImage[0][1];
+    
+    var regex_tiles=/x[0-9]+y[0-9]+z[0-9]+/;
+    $('#innerDiv img').each(function(index,element){
+		  if(!regex_tiles.test($(element).attr('id'))){
+				ville=$(element).attr('ville');
+				$(element).attr('style','position: absolute;left:'+Math.floor(positionVille[ville][0]*ratioY)+'px;top:'+Math.floor(positionVille[ville][1]*ratioX)+'px;');    
+		  }
+    });
+}
+
+
+function startMove( event ) {
+    if( ! event )
+		  event = window.event;
+
+    dragStartLeft = event.clientX;
+    dragStartTop  = event.clientY;
+
+    
+    $('#innerDiv').css('cursor','-moz-grab');
+    top      = stripPx( $('#innerDiv').css('top'));
+    left     = stripPx( $('#innerDiv').css('left') );
+    dragging = true;
+
+    return false;
+}
+
+function processMove( event ) {
+    if( ! event )
+		  event = window.event;
+
+    if( dragging ) {
+		  //evite que l'on sorte de l'image
+		  var t=top  + (event.clientY-dragStartTop);
+		  var l=left + (event.clientX-dragStartLeft);
+		  checkInnerDiv(t, l);
+		  checkTiles();
+    }    
+}
+
+/**
+ * Fonction qui permet de bloquer le deplacement de l'image
+ * Empeche les marges positive pour innerDiv
+ */
+function checkInnerDiv(t, l){
+    if(t>0)
+		  t=0;
+    if(t<(-1*tailleImage[zoom][1]+viewportHeight))
+		  t=-1*tailleImage[zoom][1]+viewportHeight;
+    if(l>0)
+		  l=0;
+    if(l<(-1*tailleImage[zoom][0]+viewportWidth))
+		  l=-1*tailleImage[zoom][0]+viewportWidth;
+    
+    $('#innerDiv').css('top',t+"px");
+    $('#innerDiv').css('left',l+"px");
+}
+
+function stopMove( event ) {
+    $('#innerDiv').css('cursor','default');
+    dragging = false;
+}
+
+/**
+ * On change la taille du DIV interne.
+ */
+function setInnerDivSize( width, height ) {
+    $('#innerDiv').css('width',width).css('height',height);
+}
+
+/**
+ * Uniquement pour transformer une chaine de caractÃ¨res avec le suffixe "px"
+ * provenant de la feuille de style en nombre.
+ */
+function stripPx( value ) {
+    if( value == "" ) return 0;
+    return parseFloat( value.substring( 0, value.length - 2 ) );
+}            	
+
+function checkTiles() {
+    var visibleTiles    = getVisibleTiles();
+    var innerDiv        = document.getElementById( "innerDiv" );
+    var visibleTilesMap = {};
+
+    for( i = 0; i < visibleTiles.length; ++i ) { 
+		  var tileArray = visibleTiles[i];
+		  var tileName  = "x" + tileArray[0] + "y" + tileArray[1] + "z" + zoom;
+
+		  visibleTilesMap[tileName] = true;
+
+		  if($('#'+tileName).length==0){
+				var img=$('<img/>').attr({
+					 src:"http://localhost:8080/WebService/resources/tiles/" + tileName + ".jpg",
+					 style:"position:absolute;left:"+(tileArray[0] * tileSize) + "px;top:"+(tileArray[1] * tileSize) + "px;",
+					 id:tileName
+				});
+				$('#innerDiv').append(img);
+		  }
+    }
+    
+    var imgs = innerDiv.getElementsByTagName( "img" );
+    for( i=0; i<imgs.length; ++i ) {
+		  var id = imgs[i].getAttribute( "id" );
+
+		  // on test si il l'agit bien d'une tiles
+		  var regex_tiles=/x[0-9]+y[0-9]+z[0-9]+/;
+		  if(regex_tiles.test(id)){
+				if( ! visibleTilesMap[id] ) {
+					 innerDiv.removeChild( imgs[i] );
+					 i--;
+				}
+		  }
+    }
+}
+
+function getVisibleTiles() {
+
+    var mapX = stripPx($('#innerDiv').css('left') );
+    var mapY = stripPx( $('#innerDiv').css('top') );
+
+    var startX = Math.abs( Math.floor( mapX / tileSize ))  - 1;
+    if(startX<0)
+		  startX=0;
+    var startY = Math.abs( Math.floor( mapY / tileSize )) - 1;
+    if(startY<0)
+		  startY=0;
+    var tilesX = Math.ceil( viewportWidth / tileSize ) + 1;
+    var tilesY = Math.ceil( viewportHeight / tileSize ) + 1;
+
+    var visibleTileArray = [];
+    var counter = 0;
+
+    for( x = startX; x < (tilesX + startX); x++ ) {
+		  for( y = startY; y < (tilesY + startY); y++ ) {
+				visibleTileArray[counter++] = [x, y];
+		  }
+    }
+    /*centre*/
+    centreX = visibleTileArray[Math.floor(visibleTileArray.length/2)][0];
+    centreY = visibleTileArray[Math.floor(visibleTileArray.length/2)][1];
+
+    return visibleTileArray;
+}
+
+
+/***************************************** AJAX **********************************/
+
+/**
+ * Fonction qui va demandé a la partie java de faire le calcul d'itinéraire
+ */
+function getItineraire(){
+
+    var villeDepart=$('#depart option:selected').text();
+    var villeDestination=$('#destination option:selected').text();
+    
+    // on test si il y a bien deux villes de selectionner et si elle ne sont pas egal
+    if(villeDepart!='-----' && villeDestination!='-----' && villeDepart!=villeDestination){
+		  $.ajax({
+				url:"/Maps/response",
+				data:{
+					 'villeDep':villeDepart,
+					 'villeDest':villeDestination,
+				},
+				dataType:'xml',
+				success:function(data){
+					 afficheItineraire(data);
+				}
+		  });
+		  
+    }
+    else if(villeDepart=='-----' || villeDestination=='-----')
+		  alert("Vous devez choisir deux villes");
+    else if (villeDepart==villeDestination)
+		  alert("Vous devez choisir deux villes differentes");
+}
+
+
+/**
+ * Fonction appelé par la methode ce callback
+ * Cette fonction va afficher les punaises de chaque point de passage et generer l'iteraire via les données XML renvoyé par la partie JAVA
+ */
+function afficheItineraire(data){
+    
+    // calcul du ratio de zoom pour le placement des punaises
+    var ratioX=tailleImage[zoom][0]/tailleImage[0][0];
+    var ratioY=tailleImage[zoom][1]/tailleImage[0][1];	
+    
+    // recuperation de tous les points de passages
+    var villes=data.getElementsByTagName("ville");
+    
+    affichage="<ol>";
+    
+    for (var i =0 ; i<villes.length;i++){
+		  
+		  var numVille=$(villes)[i].childNodes[1].textContent;
+		  var nomVilleOrigine=$(villes)[i].childNodes[3].textContent;
+
+		  // on remplace les - et les espaces par des underscore 
+		  var nomVille=nomVilleOrigine.replace(/[- ]/g,"_");
+
+		  // si ce n'est pas la derniere ou la premiere ville, on affiche les punaises
+		  if(i!=0 && i<(villes.length-1)){
+				
+				// creation des punaises
+				var punaise=$('<img/>').attr({
+					 id:'punaise_'+numVille,
+					 src:'http://localhost:8080/WebService/resources/punaise_'+numVille+'.png',
+					 alt:'punaise ville '+numVille,
+					 title:Premiere(nomVilleOrigine),
+					 ville:nomVille,
+					 class:'punaise',
+					 style:'position: absolute;left:'+Math.floor(positionVille[nomVille][0]*ratioY)+'px;top:'+Math.floor(positionVille[nomVille][1]*ratioX)+'px;'
+				});
+				$('#divPunaise').append(punaise);	    
+		  }
+		  affichage+="<li>"+nomVilleOrigine+"</li>";
+    }
+    
+    // on affiche le nombres de kilometre total
+    var distance=data.getElementsByTagName("distance")[0].textContent;
+    affichage+="<li style='list-style-type:none;'>Distance: "+distance+"Km</li>";
+    affichage+="</ol>";
+    
+    // on affiche la div itineraire
+    $('#itineraire').show();
+
+    // on affiche dans la div d'itineraire 
+    $('#listeItineraire').html(affichage);
+}
+

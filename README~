@@ -1,0 +1,9 @@
+############ Guide de démarage ################################
+
+1.Décompression de l'archive
+2.Faire un Chmod 755 -R pour le répertoire principale "Web Service"
+3.Créer un lien symbolique : sudo ln -s /"chemin vers le répertoire"/ /var/lib/tomcate6/webapps
+4.Redémarré tomcat
+5.Terminé
+
+On doit avoir un accès au net ( des plugins ou pour la réponse des différents services)
